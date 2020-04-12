@@ -57,33 +57,31 @@ class Dzida():
     tytul = ""
     link = ""
     video = False
+    image_div = ""
     hash =  ""
     nazwa_pliku = ""
 
     def __init__(self, image_div):
-        image_div = str(image_div)
-        index_start = image_div.find('img alt="') + len('img alt="')
-        index_end = image_div.find('"', index_start)
-        self.tytul = image_div[index_start:index_end] 
-        index_start = image_div.find('src="', index_end) + len('src="') 
-        index_end = image_div.find('"', index_start)
-        self.link = image_div[index_start:index_end]
-        index_start = self.link.rfind("/") + 1
-        index_end = self.link.rfind(".")
-        self.hash = self.link[index_start:index_end]
-        if self.link[-4:] == ".mp4":
-            self.tytul = self.link[-12:-4]
+        self.image_div = image_div
+        self.link = re.search(r'(?<=src=")https://.*?\.(jpg|jpeg|png|mp4)', image_div, flags=re.I)[0]
+        self.hash = self.link.split("/")[-1].split(".")[0]
+        if image_div.find("<video class=") != -1:
+            self.video = True
+            self.tytul = self.hash[-8:]
+        else:
+            self.tytul = re.search(r'(?<=img alt=").*?(?=")',image_div)[0]
 
     def pobierz_do(self, katalog = "dzidy"):
         self.nazwa_pliku = re.sub(r'\W+', '', self.tytul.replace(" ", "_")) + "." + self.link.split(".")[-1]
         try:
             request.urlretrieve(self.link, katalog + "/" + self.nazwa_pliku) 
-        except e:
-            print(e)
+        except FileNotFoundError:
             print(f"Pobieranie nie powiodło się :(")
             print(f"Tytul;\t{self.tytul}")
             print(f"Nazwa pliku;\t{self.nazwa_pliku}")
             print(f"Link;\t{self.link}")
+            print(f"image_div: \t{self.image_div}")
+
 
 def pobierz_nowe(hash_ostatniej_dzidy):
     global max_stron
