@@ -89,17 +89,25 @@ def pobierz_nowe(hash_ostatniej_dzidy):
     global max_stron
     global hash_pierwszej
     global q
-    str = 1
+    strona = 1
     pierw = True
     dzidy = []
-    while str <= max_stron:
-        page = f"https://jbzdy.cc/str/{str}"
+    while strona <= max_stron:
+        page = f"https://jbzdy.cc/str/{strona}"
         html = request.urlopen(page)
-        print(f"Parsowanie {str} strony")
+        print(f"Parsowanie {strona} strony")
 
         soup = bs(html, 'html.parser')
         image = soup.find_all('div', attrs={'class':'article-image'})
         for x in image:
+            x = str(x)
+            if x.find("www.youtube.com") != -1:
+                print("__________FIX_ME__________")
+                print("Pominięto link z Youtube. Pobieranie tego typu treści nie jest jeszcze wspierane")
+                link = re.search('(?<=src=")https://www.youtube.com/.*?(?=")', x)[0]
+                print(f"Link = {link}")
+                print("________END_FIX_ME________")
+                continue
             dzida = Dzida(x)
             if dzida.hash == hash_ostatniej_dzidy:
                 print("Pobrano wszystkie nowe dzidy")
@@ -108,7 +116,7 @@ def pobierz_nowe(hash_ostatniej_dzidy):
                 hash_pierwszej = dzida.hash
                 pierw = False
             q.put(dzida)
-        str += 1
+        strona += 1
 
 def move(plik, cel):
     nazwa_pliku = plik.split("/")[-1]
