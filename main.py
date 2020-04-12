@@ -28,10 +28,9 @@ if platform.machine() =='aarch64':
         import androidhelper
         
 
-
 # Defs
-max_stron= 10
-max_liczba_watkow = 1
+max_stron= 25
+max_liczba_watkow = 20
 if android:
     droid = androidhelper.sl4a.Android()
 q = Queue()
