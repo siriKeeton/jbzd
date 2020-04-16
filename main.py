@@ -68,7 +68,7 @@ class Dzida():
             self.video = True
             self.tytul = self.hash[-8:]
         else:
-            self.tytul = re.search(r'(?<=img alt=").*?(?=")',image_div)[0]
+            self.tytul = re.search(r'(?<=img alt=(\'|")).*?(?=(\'|"))',image_div)[0]
 
     def pobierz_do(self, katalog = "dzidy"):
         self.nazwa_pliku = re.sub(r'\W+', '', self.tytul.replace(" ", "_")) + "." + self.link.split(".")[-1]
