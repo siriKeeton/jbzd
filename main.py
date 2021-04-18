@@ -19,18 +19,21 @@ except ModuleNotFoundError:
     from bs4 import BeautifulSoup as bs
 
 android=False
-if platform.machine() =='aarch64':
+if platform.machine() == "amd64":
+    print (f"Platform : '{platform.machine()}'. not using android")
+else:
     android = True
     try:
         import androidhelper
     except ModuleNotFoundError:
         pip.main(["install", "androidhelper"])
         import androidhelper
+    
         
 
 # Defs
-max_stron= 25
-max_liczba_watkow = 20
+max_stron= 50
+max_liczba_watkow = 10
 if android:
     droid = androidhelper.sl4a.Android()
 q = Queue()
@@ -61,8 +64,9 @@ class Dzida():
     nazwa_pliku = ""
 
     def __init__(self, image_div):
+        print(image_div)
         self.image_div = image_div
-        self.link = re.search(r'(?<=src=")https://.*?\.(jpg|jpeg|png|mp4)', image_div, flags=re.I)[0]
+        self.link = re.search(r'(?<=src=")https://.*?\.(jpg|jpeg|png|gif|mp4)', image_div, flags=re.I)[0]
         self.hash = self.link.split("/")[-1].split(".")[0]
         if image_div.find("<video class=") != -1:
             self.video = True
@@ -101,8 +105,8 @@ def pobierz_nowe(hash_ostatniej_dzidy):
             if x.find("www.youtube.com") != -1:
                 print("__________FIX_ME__________")
                 print("Pominięto link z Youtube. Pobieranie tego typu treści nie jest jeszcze wspierane")
-                link = re.search('(?<=src=")https://www.youtube.com/.*?(?=")', x)[0]
-                print(f"Link = {link}")
+                #link = re.search('(?<=src=")https://www.youtube.com/.*?(?=")', x)[0]
+                #print(f"Link = {link}")
                 print("________END_FIX_ME________")
                 continue
             dzida = Dzida(x)
@@ -130,8 +134,10 @@ def watek_pobierania():
         dzida = q.get()
         if dzida is None:
             break
+        if dzida.tytul == "":
+            dzida.tytul = dzida.link[-6:]
         dzida.pobierz_do("dzidy")
-        print(f"{dzida.tytul} : {dzida.link}")
+        print(f"{dzida.tytul} :\n\t{dzida.link}")
         q.task_done()
 
 
