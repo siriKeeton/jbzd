@@ -7,6 +7,7 @@ import ssl
 import sys
 import threading
 import time
+from datetime import date
 from glob import glob
 from queue import Queue
 from string import punctuation
@@ -40,24 +41,12 @@ hash_pierwszej = ""
 ssl._create_default_https_context = ssl._create_unverified_context
 #
 if android:
-    # Check if "Simple Gallery" is installed
-    found = False
-    for x in droid.getLaunchableApplications().result.values():
-        if x.find('com.simplemobiletools.gallery') != -1:
-            found = True
-            break
-    if not found:
-        print("Zainstaluj 'Simple Gallery'!!")
-        droid.notify("'Simple Gallery' nie jest zainstalowane",
-            "Żeby używać scrapper'a zainstaluj 'Simple Gallery'/'Prosta Galeria' ze sklepu Play")
-        sys.exit(1)
-
     droid.makeToast("Rozpoczynam przeszukiwanie")
 
 class Dzida():
     tytul = ""
     link = ""
-    video = False
+    jestWideo = False
     image_div = ""
     hash =  ""
     nazwa_pliku = ""
@@ -67,7 +56,7 @@ class Dzida():
         self.link = re.search(r'(?<=src=")https://.*?\.(jpg|jpeg|png|gif|mp4)', image_div, flags=re.I)[0]
         self.hash = self.link.split("/")[-1].split(".")[0]
         if image_div.find("<video class=") != -1:
-            self.video = True
+            self.jestWideo= True
             self.tytul = self.hash[-8:]
         else:
             self.tytul = re.search(r'(?<=img alt=(\'|")).*?(?=(\'|"))',image_div)[0]
@@ -100,13 +89,6 @@ def pobierz_nowe(hash_ostatniej_dzidy):
         image = soup.find_all('div', attrs={'class':'article-image'})
         for x in image:
             x = str(x)
-            if x.find("www.youtube.com") != -1:
-                print("__________FIX_ME__________")
-                print("Pominięto link z Youtube. Pobieranie tego typu treści nie jest jeszcze wspierane")
-                #link = re.search('(?<=src=")https://www.youtube.com/.*?(?=")', x)[0]
-                #print(f"Link = {link}")
-                print("________END_FIX_ME________")
-                continue
             dzida = Dzida(x)
             if dzida.hash == hash_ostatniej_dzidy:
                 print("Pobrano wszystkie nowe dzidy")
@@ -117,27 +99,9 @@ def pobierz_nowe(hash_ostatniej_dzidy):
             q.put(dzida)
         strona += 1
 
-def move(plik, cel):
-    nazwa_pliku = plik.split("/")[-1]
-    cel = os.path.abspath(cel)
-    os.rename(plik, cel + "/." + nazwa_pliku)
-
 def dir_check_or_create(path):
     if not os.path.isdir(path):
         os.makedirs(path)
-
-def watek_pobierania():
-    global q
-    while True:
-        dzida = q.get()
-        if dzida is None:
-            break
-        if dzida.tytul == "":
-            dzida.tytul = dzida.link[-6:]
-        dzida.pobierz_do("dzidy")
-        pozostalo_dzid = q.qsize()
-        print(f"{liczba_dzid - pozostalo_dzid}/{liczba_dzid} - {dzida.tytul} :\n\t{dzida.link}")
-        q.task_done()
 
 
 if __name__ == "__main__":
@@ -151,11 +115,6 @@ if __name__ == "__main__":
         ostatnia_dzida = "?" * 24
 
     dir_check_or_create("dzidy")
-    dir_check_or_create("stare_dzidy")
-
-    stare_dzidy = glob("dzidy/*")
-    for dzida in stare_dzidy:
-        move(dzida, "stare_dzidy")
 
     pobierz_nowe(ostatnia_dzida)
     if q.empty():
@@ -168,20 +127,20 @@ if __name__ == "__main__":
         print(f"Znaleziono {q.qsize()} nowych linków")
 
     # Pobieranie asynchronicznie
-    watki = []
-    liczba_dzid= q.qsize();
-    for i in range(max_liczba_watkow):
-        w = threading.Thread(target=watek_pobierania)
-        w.start()
-        watki.append(w)
+    Html_Header = '<!DOCTYPE html><html><body style="background-color:#1e1e1e;color:#c9c9c9;font-family:sans-serif"><center>\n'
+    Html_Footer = '</center></body></html>'
+    Html_Contents = ""
+    File_Name = date.today().strftime("%d-%m-%Y") + ".html"
 
-    q.join()
+    while (q.qsize() > 0):
+        dzida = q.get()
+        if dzida.jestWideo:
+            Html_Contents += f'<h2>{dzida.tytul}</h2><embed media="(min-width: 600px) src="{dzida.link}" frameborder="0" allowfullscreen"><hr>\n'
+        else:
+            Html_Contents += f'<h2>{dzida.tytul}</h2><img src="{dzida.link}" alt="{dzida.tytul}"><hr>\n'
 
-    # Zakończ wątki
-    for i in range(max_liczba_watkow):
-         q.put(None)
-    for w in watki:
-        w.join()
+    with open(File_Name, "w") as htmlfile:
+        htmlfile.write(Html_Header + Html_Contents + Html_Footer);
 
     with open("ostatnia_dzida", 'w') as outfile:
         outfile.write(hash_pierwszej)
