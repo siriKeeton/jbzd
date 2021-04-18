@@ -19,7 +19,7 @@ except ModuleNotFoundError:
     from bs4 import BeautifulSoup as bs
 
 android=False
-if platform.machine() == "amd64":
+if platform.machine() != "armv81":
     print (f"Platform : '{platform.machine()}'. not using android")
 else:
     android = True
