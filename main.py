@@ -136,7 +136,8 @@ def watek_pobierania():
         if dzida.tytul == "":
             dzida.tytul = dzida.link[-6:]
         dzida.pobierz_do("dzidy")
-        print(f"{dzida.tytul} :\n\t{dzida.link}")
+        pozostalo_dzid = q.qsize()
+        print(f"{liczba_dzid - pozostalo_dzid}/{liczba_dzid} - {dzida.tytul} :\n\t{dzida.link}")
         q.task_done()
 
 
@@ -169,6 +170,7 @@ if __name__ == "__main__":
 
     # Pobieranie asynchronicznie
     watki = []
+    liczba_dzid= q.qsize();
     for i in range(max_liczba_watkow):
         w = threading.Thread(target=watek_pobierania)
         w.start()
