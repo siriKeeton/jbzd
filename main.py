@@ -129,26 +129,33 @@ if __name__ == "__main__":
     # Pobieranie asynchronicznie
     Html_Header = '<!DOCTYPE html><html><body style="background-color:#1e1e1e;color:#c9c9c9;font-family:sans-serif"><center>\n'
     Html_Footer = '</center></body></html>'
-    Html_Contents = ""
+    Html_Body = ""
     File_Name = date.today().strftime("%d-%m-%Y") + ".html"
+    File_Path = os.path.abspath(File_Name)
 
     while (q.qsize() > 0):
         dzida = q.get()
         if dzida.jestWideo:
-            Html_Contents += f'<h2>{dzida.tytul}</h2><embed media="(min-width: 600px) src="{dzida.link}" frameborder="0" allowfullscreen"><hr>\n'
+            Html_Body += f'<h2>{dzida.tytul}</h2><video controls muted="true" object-fit="fill"><source src="{dzida.link}" frameborder="0" allowfullscreen></video><hr>\n'
         else:
-            Html_Contents += f'<h2>{dzida.tytul}</h2><img src="{dzida.link}" alt="{dzida.tytul}"><hr>\n'
+            Html_Body += f'<h2>{dzida.tytul}</h2><img src="{dzida.link}" alt="{dzida.tytul}"><hr>\n'
+
+    if os.path.isfile(File_Path):
+        with open(File_Path, "r") as old_file:
+            previous_content = old_file.read().split("\n")
+        previous_content = [x for x in previous_content if x.find('id="nowe"') ==-1][:-1]
+
+        html_code = "\n".join(previous_content) + '<h1 id="nowe">Nowe</h1>\n' +  Html_Body + Html_Footer
+    else:
+        html_code = Html_Header + '<h1 id="nowe">Nowe</h1>\n' + Html_Body + Html_Footer
 
     with open(File_Name, "w") as htmlfile:
-        htmlfile.write(Html_Header + Html_Contents + Html_Footer);
+        htmlfile.write(html_code);
 
     with open("ostatnia_dzida", 'w') as outfile:
         outfile.write(hash_pierwszej)
     if android:
-        # droid.notify("Dzidy pobrane", f"Pobrano {len(dzidy)} nowe dzidy!")
-        droid.startActivity('android.intent.action.MAIN',
-                            None, None, None, False,
-                            'com.simplemobiletools.gallery',
-                            'com.simplemobiletools.gallery.activities.MainActivity')
+        intent2start = droid.makeIntent("android.intent.action.VIEW", File_Path + "#nowe", "text/html", None, [u"android.intent.category.BROWSABLE"], None, None, None)
+        print(droid.startActivityForResultIntent(intent2start.result))
     sys.exit(0)
 
