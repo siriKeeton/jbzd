@@ -135,9 +135,9 @@ if __name__ == "__main__":
     while (q.qsize() > 0):
         dzida = q.get()
         if dzida.jestWideo:
-            Html_Body += f'<h2>{dzida.tytul}</h2><video controls muted="true" object-fit="fill"><source src="{dzida.link}" frameborder="0" allowfullscreen></video><hr>\n'
+            Html_Body += f'<h2>{dzida.tytul}</h2><video controls muted="true" width="100%" object-fit="fill"><source src="{dzida.link}" frameborder="0" allowfullscreen></video><hr>\n'
         else:
-            Html_Body += f'<h2>{dzida.tytul}</h2><img src="{dzida.link}" alt="{dzida.tytul}"><hr>\n'
+            Html_Body += f'<h2>{dzida.tytul}</h2><img src="{dzida.link}" alt="{dzida.tytul}" width="100%"><hr>\n'
 
     if os.path.isfile(File_Path):
         with open(File_Path, "r") as old_file:
