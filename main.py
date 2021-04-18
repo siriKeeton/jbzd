@@ -63,7 +63,6 @@ class Dzida():
     nazwa_pliku = ""
 
     def __init__(self, image_div):
-        print(image_div)
         self.image_div = image_div
         self.link = re.search(r'(?<=src=")https://.*?\.(jpg|jpeg|png|gif|mp4)', image_div, flags=re.I)[0]
         self.hash = self.link.split("/")[-1].split(".")[0]
