@@ -6,11 +6,10 @@ import re
 import ssl
 import sys
 import threading
-import time
 from datetime import date
-from glob import glob
 from queue import Queue
 from string import punctuation
+
 from urllib import request
 try:
     from bs4 import BeautifulSoup as bs
