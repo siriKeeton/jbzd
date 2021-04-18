@@ -28,8 +28,7 @@ else:
     except ModuleNotFoundError:
         pip.main(["install", "androidhelper"])
         import androidhelper
-    
-        
+
 
 # Defs
 max_stron= 50
@@ -41,7 +40,7 @@ hash_pierwszej = ""
 ssl._create_default_https_context = ssl._create_unverified_context
 #
 if android:
-    # Check if "Simple Gallery" is installed 
+    # Check if "Simple Gallery" is installed
     found = False
     for x in droid.getLaunchableApplications().result.values():
         if x.find('com.simplemobiletools.gallery') != -1:
@@ -52,7 +51,7 @@ if android:
         droid.notify("'Simple Gallery' nie jest zainstalowane",
             "Żeby używać scrapper'a zainstaluj 'Simple Gallery'/'Prosta Galeria' ze sklepu Play")
         sys.exit(1)
-    
+
     droid.makeToast("Rozpoczynam przeszukiwanie")
 
 class Dzida():
@@ -77,7 +76,7 @@ class Dzida():
     def pobierz_do(self, katalog = "dzidy"):
         self.nazwa_pliku = re.sub(r'\W+', '', self.tytul.replace(" ", "_")) + "." + self.link.split(".")[-1]
         try:
-            request.urlretrieve(self.link, katalog + "/" + self.nazwa_pliku) 
+            request.urlretrieve(self.link, katalog + "/" + self.nazwa_pliku)
         except FileNotFoundError:
             print(f"Pobieranie nie powiodło się :(")
             print(f"Tytul;\t{self.tytul}")
@@ -186,7 +185,7 @@ if __name__ == "__main__":
     with open("ostatnia_dzida", 'w') as outfile:
         outfile.write(hash_pierwszej)
     if android:
-        # droid.notify("Dzidy pobrane", f"Pobrano {len(dzidy)} nowe dzidy!") 
+        # droid.notify("Dzidy pobrane", f"Pobrano {len(dzidy)} nowe dzidy!")
         droid.startActivity('android.intent.action.MAIN',
                             None, None, None, False,
                             'com.simplemobiletools.gallery',
