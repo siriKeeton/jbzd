@@ -156,5 +156,6 @@ if __name__ == "__main__":
     if android:
         intent2start = droid.makeIntent("android.intent.action.VIEW", File_Path + "#nowe", "text/html", None, [u"android.intent.category.BROWSABLE"], None, None, None)
         print(droid.startActivityForResultIntent(intent2start.result))
+        input("  ")
     sys.exit(0)
 
